@@ -4,7 +4,6 @@
 
 SkillMap AI takes a skill or job role (e.g. *"React Developer"*, *"Machine Learning Engineer"*) and uses a multi-agent AI system to produce a fully structured learning plan — complete with curated resources, projects, and quizzes for every subtopic.
 
-**[Live Demo →](https://your-app.streamlit.app)**
 
 ---
 
