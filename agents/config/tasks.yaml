@@ -1,0 +1,90 @@
+architect_task:
+  description: >
+    Design a complete learning roadmap topic tree for: "{skill}" at {level} level.
+
+    Rules:
+    - 5 to 8 major topics, ordered from foundational to advanced
+    - 2 to 5 subtopics per topic
+    - Each subtopic has a name and a 1-sentence description
+    - Topic and subtopic names must be concise (2-5 words)
+    - Generate a slug ID for each subtopic: lowercase, hyphens, no special chars
+      Example: "Variables & Data Types" -> "variables-and-data-types"
+    - Return ONLY valid JSON. No markdown. No explanation. No code fences.
+
+  expected_output: >
+    {
+      "topics": [
+        {
+          "name": "string",
+          "subtopics": [
+            {
+              "id": "slug-string",
+              "name": "string",
+              "description": "string"
+            }
+          ]
+        }
+      ]
+    }
+
+quiz_generator_task:
+  description: >
+    Generate quiz questions for this roadmap on skill: "{skill}".
+
+    Topic tree:
+    {topic_tree}
+
+    For EACH subtopic, generate exactly 5 questions:
+    - 3 MCQ: 4 options each (a, b, c, d), correct answer as letter
+      Wrong options must be plausible misconceptions, not obviously wrong
+    - 2 open-ended: concise model answer (2-3 sentences max)
+
+    Also generate 1 final_quiz with exactly 10 questions covering the whole roadmap.
+
+    Return ONLY valid JSON. No markdown. No explanation. No code fences.
+
+  expected_output: >
+    {
+      "subtopics": {
+        "subtopic-slug": [
+          {"question": "string", "type": "mcq", "options": ["string","string","string","string"], "answer": "a|b|c|d"},
+          {"question": "string", "type": "open", "options": [], "answer": "string"}
+        ]
+      },
+      "final": [
+        {"question": "string", "type": "mcq|open", "options": [] or ["string"], "answer": "string"}
+      ]
+    }
+
+timeline_budget_task:
+  description: >
+    Create a learning timeline and budget for: "{skill}" at {level} level.
+
+    Topic tree:
+    {topic_tree}
+
+    Timeline rules:
+    - Estimate hours per subtopic: beginner 4-6h, intermediate 6-10h, advanced 8-12h
+    - total_weeks = ceil(total_hours / 10)
+
+    Budget rules:
+    - free_path: YouTube + freeCodeCamp + official docs = $0
+    - paid_path: 2-3 Udemy courses at ~$15 each
+    - Include real approximate prices
+
+    Return ONLY valid JSON. No markdown. No explanation. No code fences.
+
+  expected_output: >
+    {
+      "timeline": {
+        "total_weeks": integer,
+        "hours_per_week": 10,
+        "total_hours": integer,
+        "per_topic": [{"topic": "string", "hours": integer}]
+      },
+      "budget": {
+        "free_path_total": "$0",
+        "paid_path_total": "string",
+        "items": [{"name": "string", "free": "string", "paid_price": "string"}]
+      }
+    }
