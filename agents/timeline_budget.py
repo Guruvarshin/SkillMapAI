@@ -6,6 +6,8 @@ from utils.helpers import (
     get_mechanical_llm,
     extract_json,
 )
+
+
 def build_timeline_budget_agent() -> Agent:
     cfg = load_agent_config("timeline_budget")
     return Agent(
@@ -16,6 +18,8 @@ def build_timeline_budget_agent() -> Agent:
         verbose=cfg.get("verbose", False),
         allow_delegation=cfg.get("allow_delegation", False),
     )
+
+
 def build_timeline_budget_task(
     agent: Agent,
     topic_tree: dict,
@@ -34,6 +38,8 @@ def build_timeline_budget_task(
         expected_output=cfg["expected_output"],
         agent=agent,
     )
+
+
 def run_timeline_budget(topic_tree: dict, skill: str, level: str) -> dict:
     try:
         agent = build_timeline_budget_agent()
@@ -46,6 +52,7 @@ def run_timeline_budget(topic_tree: dict, skill: str, level: str) -> dict:
         )
         result = crew.kickoff()
         from utils.helpers import extract_crew_result
+
         data = extract_crew_result(result) or {}
         if "timeline" not in data:
             data["timeline"] = {}
@@ -56,17 +63,19 @@ def run_timeline_budget(topic_tree: dict, skill: str, level: str) -> dict:
             tl["hours_per_week"] = 10
         if not tl.get("total_weeks") and tl.get("total_hours"):
             import math
+
             tl["total_weeks"] = max(1, math.ceil(tl["total_hours"] / 10))
         if not tl.get("total_hours") and tl.get("per_topic"):
-            tl["total_hours"] = sum(
-                t.get("hours", 0) for t in tl.get("per_topic", [])
-            )
+            tl["total_hours"] = sum(t.get("hours", 0) for t in tl.get("per_topic", []))
         return data
     except Exception as e:
         print(f"[TimelineBudget] Failed: {e}")
         return _build_fallback(topic_tree, level)
+
+
 def _build_fallback(topic_tree: dict, level: str) -> dict:
     import math
+
     hours_per_subtopic = {"beginner": 4, "intermediate": 6, "advanced": 9}
     base_hours = hours_per_subtopic.get(level, 5)
     topics = topic_tree.get("topics", [])
@@ -76,10 +85,12 @@ def _build_fallback(topic_tree: dict, level: str) -> dict:
         subtopic_count = len(topic.get("subtopics", []))
         topic_hours = subtopic_count * base_hours
         total_hours += topic_hours
-        per_topic.append({
-            "topic": topic.get("name", "Topic"),
-            "hours": topic_hours,
-        })
+        per_topic.append(
+            {
+                "topic": topic.get("name", "Topic"),
+                "hours": topic_hours,
+            }
+        )
     total_weeks = max(1, math.ceil(total_hours / 10))
     return {
         "timeline": {

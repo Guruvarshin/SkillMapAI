@@ -2,6 +2,7 @@ import streamlit as st
 from db.quizzes import get_quiz, get_final_quiz
 from db.progress import save_quiz_score, save_final_quiz_score, get_progress
 
+
 def render_quiz() -> None:
 
     roadmap_id = st.session_state.get("current_roadmap_id")
@@ -56,6 +57,7 @@ def render_quiz() -> None:
 
     _render_quiz_form(questions, subtopic_id, roadmap_id, user_id)
 
+
 def _render_quiz_form(
     questions: list,
     subtopic_id: str,
@@ -66,7 +68,7 @@ def _render_quiz_form(
     mcq_questions = [q for q in questions if q.get("type") == "mcq"]
     open_questions = [q for q in questions if q.get("type") != "mcq"]
 
-    user_answers = {}                                            
+    user_answers = {}
 
     with st.form(f"quiz_form_{subtopic_id}"):
 
@@ -91,7 +93,7 @@ def _render_quiz_form(
                     label_visibility="collapsed",
                 )
                 user_answers[i] = chosen
-                st.markdown("")           
+                st.markdown("")
 
         if open_questions:
             st.subheader(f"Open-Ended ({len(open_questions)} questions)")
@@ -122,6 +124,7 @@ def _render_quiz_form(
             roadmap_id=roadmap_id,
             user_id=user_id,
         )
+
 
 def _score_and_save(
     mcq_questions: list,
@@ -193,6 +196,7 @@ def _score_and_save(
 
     st.session_state.pop(f"retake_{subtopic_id}", None)
 
+
 def _render_prior_result(prior_score, subtopic_id: str, questions: list) -> None:
 
     if isinstance(prior_score, dict):
@@ -206,6 +210,7 @@ def _render_prior_result(prior_score, subtopic_id: str, questions: list) -> None
 
     badge = "🎉 Passed" if passed else "📚 Not passed"
     st.info(f"**Previous score:** {score}/{total} — {badge}")
+
 
 def _back_button() -> None:
 

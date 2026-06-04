@@ -1,15 +1,21 @@
 from datetime import datetime, timezone
 from db.mongo import get_db
+
+
 def get_progress(user_id: str, roadmap_id: str) -> dict:
     db = get_db()
-    doc = db.progress.find_one({
-        "user_id": user_id,
-        "roadmap_id": roadmap_id,
-    })
+    doc = db.progress.find_one(
+        {
+            "user_id": user_id,
+            "roadmap_id": roadmap_id,
+        }
+    )
     if doc:
         doc["_id"] = str(doc["_id"])
         return doc
     return _empty_progress(user_id, roadmap_id)
+
+
 def mark_subtopic_done(
     user_id: str,
     roadmap_id: str,
@@ -28,7 +34,7 @@ def mark_subtopic_done(
                 "overall_pct": 0.0,
             },
         },
-        upsert=True,                                       
+        upsert=True,
     )
     doc = db.progress.find_one(
         {"user_id": user_id, "roadmap_id": roadmap_id},
@@ -41,6 +47,8 @@ def mark_subtopic_done(
         {"$set": {"overall_pct": new_pct}},
     )
     return new_pct
+
+
 def mark_subtopic_undone(
     user_id: str,
     roadmap_id: str,
@@ -68,6 +76,8 @@ def mark_subtopic_undone(
         {"$set": {"overall_pct": new_pct}},
     )
     return new_pct
+
+
 def save_quiz_score(
     user_id: str,
     roadmap_id: str,
@@ -96,6 +106,8 @@ def save_quiz_score(
         },
         upsert=True,
     )
+
+
 def save_final_quiz_score(
     user_id: str,
     roadmap_id: str,
@@ -120,6 +132,8 @@ def save_final_quiz_score(
         },
         upsert=True,
     )
+
+
 def _empty_progress(user_id: str, roadmap_id: str) -> dict:
     return {
         "_id": None,
@@ -133,6 +147,8 @@ def _empty_progress(user_id: str, roadmap_id: str) -> dict:
         "overall_pct": 0.0,
         "last_updated": None,
     }
+
+
 def count_total_subtopics(roadmap: dict) -> int:
     topics = roadmap.get("topics") or []
     return sum(len(t.get("subtopics", [])) for t in topics)

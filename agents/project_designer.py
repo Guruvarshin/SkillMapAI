@@ -9,26 +9,32 @@ from utils.helpers import (
     extract_crew_result,
     slugify,
 )
+
+
 def _build_mini_capstone_agent() -> Agent:
     cfg = load_agent_config("project_designer")
     return Agent(
         role=cfg["role"],
         goal=cfg["goal"],
         backstory=cfg["backstory"],
-        llm=get_mechanical_llm(),                           
+        llm=get_mechanical_llm(),
         verbose=False,
         allow_delegation=False,
     )
+
+
 def _build_major_project_agent() -> Agent:
     cfg = load_agent_config("project_designer")
     return Agent(
         role=cfg["role"],
         goal=cfg["goal"],
         backstory=cfg["backstory"],
-        llm=get_reasoning_llm(),                               
+        llm=get_reasoning_llm(),
         verbose=False,
         allow_delegation=False,
     )
+
+
 def run_project_designer(topic_tree: dict, skill: str, level: str) -> dict:
     topics = topic_tree.get("topics", [])
     all_subtopic_projects = {}
@@ -64,6 +70,8 @@ def run_project_designer(topic_tree: dict, skill: str, level: str) -> dict:
         "subtopics": all_subtopic_projects,
         "major_project": major_project,
     }
+
+
 def _run_mini_capstone_for_topic(
     agent: Agent,
     topic: dict,
@@ -113,9 +121,12 @@ Use the exact subtopic IDs shown above as keys."""
             continue
         clean[sub_id] = {
             "mini_project": proj_data.get("mini_project") or _fallback_mini(sub_id),
-            "capstone_project": proj_data.get("capstone_project") or _fallback_capstone(sub_id, topic_name),
+            "capstone_project": proj_data.get("capstone_project")
+            or _fallback_capstone(sub_id, topic_name),
         }
     return clean if clean else None
+
+
 def _run_major_project(topic_tree: dict, skill: str, level: str) -> dict:
     agent = _build_major_project_agent()
     topics_summary = "\n".join(
@@ -150,23 +161,31 @@ Return format:
     except Exception as e:
         print(f"[ProjectDesigner] Major project failed: {e}")
     return _default_major_project(skill)
+
+
 def _fallback_mini(sub_name: str) -> dict:
     return {
         "title": f"Practice: {sub_name}",
         "use_case": f"Apply {sub_name} concepts in a small real-world scenario.",
         "tutorial_video_url": "",
     }
+
+
 def _fallback_capstone(sub_name: str, topic_name: str) -> dict:
     return {
         "title": f"{topic_name} Capstone",
         "description": f"Combine {sub_name} with other {topic_name} skills to build a complete mini-application.",
         "use_case": f"Consolidate {topic_name} knowledge",
     }
+
+
 def _fallback_subtopic_projects(sub_name: str, topic_name: str) -> dict:
     return {
         "mini_project": _fallback_mini(sub_name),
         "capstone_project": _fallback_capstone(sub_name, topic_name),
     }
+
+
 def _default_major_project(skill: str) -> dict:
     return {
         "title": f"Full-Stack {skill} Portfolio Application",
@@ -186,6 +205,8 @@ def _default_major_project(skill: str) -> dict:
         ],
         "github_structure": "src/ tests/ docs/ .github/ README.md",
     }
+
+
 def _build_project_fallbacks(topic_tree: dict, skill: str) -> dict:
     subtopics = {}
     for topic in topic_tree.get("topics", []):

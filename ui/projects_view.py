@@ -2,6 +2,7 @@ import streamlit as st
 from db.roadmaps import get_roadmap
 from utils.helpers import truncate_text
 
+
 def render_projects() -> None:
 
     roadmap_id = st.session_state.get("current_roadmap_id")
@@ -52,6 +53,7 @@ def render_projects() -> None:
     with tab_capstone:
         _render_capstone_projects(topics)
 
+
 def _render_major_project(major: dict) -> None:
 
     st.subheader("🏆 Major Portfolio Project")
@@ -83,6 +85,7 @@ def _render_major_project(major: dict) -> None:
             for f in features:
                 st.markdown(f"- {f}")
 
+
 def _render_mini_projects(topics: list) -> None:
 
     st.markdown(
@@ -112,6 +115,7 @@ def _render_mini_projects(topics: list) -> None:
 
         st.markdown("")
 
+
 def _render_mini_card(sub_name: str, proj: dict) -> None:
 
     with st.container(border=True):
@@ -123,6 +127,7 @@ def _render_mini_card(sub_name: str, proj: dict) -> None:
         vid_url = proj.get("tutorial_video_url", "")
         if vid_url:
             st.markdown(f"[▶️ Tutorial Video]({vid_url})")
+
 
 def _render_capstone_projects(topics: list) -> None:
 
@@ -149,6 +154,7 @@ def _render_capstone_projects(topics: list) -> None:
             _render_capstone_card(sub_name, cap)
 
         st.markdown("")
+
 
 def _render_capstone_card(sub_name: str, cap: dict) -> None:
 

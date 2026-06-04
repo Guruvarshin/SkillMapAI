@@ -1,6 +1,8 @@
 import urllib.parse
 from utils.helpers import slugify
 from tools.youtube_tool import YouTubeTool
+
+
 def run_video_hunter(topic_tree: dict, skill: str) -> dict:
     tool = YouTubeTool()
     results = {}
@@ -12,6 +14,7 @@ def run_video_hunter(topic_tree: dict, skill: str) -> dict:
             try:
                 video_json = tool._run(query=query, search_type="video")
                 import json
+
                 video_result = json.loads(video_json)
             except Exception:
                 video_result = _fallback_video(query, sub_name, "video")
@@ -25,6 +28,8 @@ def run_video_hunter(topic_tree: dict, skill: str) -> dict:
                 "playlist": playlist_result,
             }
     return results
+
+
 def _fallback_video(query: str, sub_name: str, vtype: str) -> dict:
     encoded = urllib.parse.quote_plus(query)
     return {
@@ -34,6 +39,8 @@ def _fallback_video(query: str, sub_name: str, vtype: str) -> dict:
         "type": vtype,
         "source": "search_url_fallback",
     }
+
+
 def build_video_fallbacks(topic_tree: dict, skill: str) -> dict:
     fallbacks = {}
     for topic in topic_tree.get("topics", []):

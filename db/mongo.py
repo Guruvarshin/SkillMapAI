@@ -3,7 +3,10 @@ import streamlit as st
 from pymongo import MongoClient
 from pymongo.errors import ConfigurationError, ServerSelectionTimeoutError
 from dotenv import load_dotenv
+
 load_dotenv()
+
+
 @st.cache_resource
 def get_client() -> MongoClient:
     uri = os.environ.get("MONGODB_URI", "").strip()
@@ -40,8 +43,12 @@ def get_client() -> MongoClient:
             "Network Access → Add IP Address → Allow from anywhere (0.0.0.0/0)"
         )
         st.stop()
+
+
 def get_db():
     return get_client()["skillmap"]
+
+
 def ensure_indexes():
     db = get_db()
     db.users.create_index("email", unique=True)

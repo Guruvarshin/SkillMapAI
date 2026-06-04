@@ -5,15 +5,18 @@ from typing import Type
 from pydantic import BaseModel, Field
 from crewai.tools import BaseTool
 from dotenv import load_dotenv
+
 load_dotenv()
+
+
 class YouTubeSearchInput(BaseModel):
-    query: str = Field(
-        description="Search query for YouTube, e.g. 'React hooks tutorial beginner'"
-    )
+    query: str = Field(description="Search query for YouTube, e.g. 'React hooks tutorial beginner'")
     search_type: str = Field(
         default="video",
-        description="Type of result to find: 'video' for a single tutorial, 'playlist' for a course playlist"
+        description="Type of result to find: 'video' for a single tutorial, 'playlist' for a course playlist",
     )
+
+
 class YouTubeTool(BaseTool):
     name: str = "youtube_search"
     description: str = (
@@ -23,6 +26,7 @@ class YouTubeTool(BaseTool):
         "Returns JSON with title, url, channel, and type fields."
     )
     args_schema: Type[BaseModel] = YouTubeSearchInput
+
     def _run(self, query: str, search_type: str = "video") -> str:
         result = self._search_youtube_api(query, search_type)
         if result:
@@ -31,29 +35,36 @@ class YouTubeTool(BaseTool):
         if result:
             return json.dumps(result)
         return json.dumps(self._fallback_search_url(query, search_type))
+
     def _search_youtube_api(self, query: str, search_type: str) -> dict | None:
         api_key = os.environ.get("YOUTUBE_API_KEY", "").strip()
         if not api_key or api_key == "your_youtube_api_key_here":
-            return None                                       
+            return None
         try:
             from googleapiclient.discovery import build
             from googleapiclient.errors import HttpError
+
             youtube = build(
-                "youtube", "v3",
+                "youtube",
+                "v3",
                 developerKey=api_key,
                 cache_discovery=False,
             )
             api_type = "playlist" if search_type == "playlist" else "video"
             enhanced_query = f"{query} tutorial" if "tutorial" not in query.lower() else query
-            response = youtube.search().list(
-                q=enhanced_query,
-                type=api_type,
-                part="snippet",
-                maxResults=3,                                        
-                relevanceLanguage="en",                          
-                safeSearch="moderate",
-                videoDuration="medium" if api_type == "video" else None,
-            ).execute()
+            response = (
+                youtube.search()
+                .list(
+                    q=enhanced_query,
+                    type=api_type,
+                    part="snippet",
+                    maxResults=3,
+                    relevanceLanguage="en",
+                    safeSearch="moderate",
+                    videoDuration="medium" if api_type == "video" else None,
+                )
+                .execute()
+            )
             items = response.get("items", [])
             if not items:
                 return None
@@ -84,12 +95,14 @@ class YouTubeTool(BaseTool):
             else:
                 print(f"[YouTubeTool] API error: {e} — falling back to Tavily")
             return None
+
     def _search_via_tavily(self, query: str, search_type: str) -> dict | None:
         api_key = os.environ.get("TAVILY_API_KEY", "").strip()
         if not api_key or api_key == "your_tavily_api_key_here":
             return None
         try:
             from tavily import TavilyClient
+
             client = TavilyClient(api_key=api_key)
             if search_type == "playlist":
                 search_query = f"site:youtube.com/playlist {query} tutorial course"
@@ -98,7 +111,7 @@ class YouTubeTool(BaseTool):
             results = client.search(
                 query=search_query,
                 max_results=3,
-                search_depth="basic",                                               
+                search_depth="basic",
             )
             for result in results.get("results", []):
                 url = result.get("url", "")
@@ -108,14 +121,15 @@ class YouTubeTool(BaseTool):
                     return {
                         "title": title,
                         "url": url,
-                        "channel": "",                                        
+                        "channel": "",
                         "type": search_type,
                         "source": "tavily_fallback",
                     }
-            return None                                            
+            return None
         except Exception as e:
             print(f"[YouTubeTool] Tavily fallback error: {e}")
             return None
+
     def _fallback_search_url(self, query: str, search_type: str) -> dict:
         search_query = f"{query} tutorial"
         if search_type == "playlist":
@@ -129,5 +143,7 @@ class YouTubeTool(BaseTool):
             "type": search_type,
             "source": "search_url_fallback",
         }
+
+
 def get_youtube_tool() -> YouTubeTool:
     return YouTubeTool()

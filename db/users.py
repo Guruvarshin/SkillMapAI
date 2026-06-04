@@ -3,6 +3,8 @@ from datetime import datetime, timezone
 from pymongo.errors import DuplicateKeyError
 from bson import ObjectId
 from db.mongo import get_db
+
+
 def register(name: str, email: str, password: str) -> dict:
     db = get_db()
     name = name.strip()
@@ -33,6 +35,8 @@ def register(name: str, email: str, password: str) -> dict:
         }
     except DuplicateKeyError:
         return f"An account with email '{email}' already exists. Please log in."
+
+
 def login(email: str, password: str) -> dict | None:
     db = get_db()
     email = email.strip().lower()
@@ -46,6 +50,8 @@ def login(email: str, password: str) -> dict | None:
     if not password_matches:
         return None
     return _clean_user(user)
+
+
 def get_user_by_id(user_id: str) -> dict | None:
     db = get_db()
     try:
@@ -56,6 +62,8 @@ def get_user_by_id(user_id: str) -> dict | None:
     if not user:
         return None
     return _clean_user(user)
+
+
 def _clean_user(user: dict) -> dict:
     return {
         "_id": str(user["_id"]),

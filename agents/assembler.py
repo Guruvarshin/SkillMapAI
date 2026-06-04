@@ -4,6 +4,8 @@ from utils.validators import RoadmapOutput
 from utils.helpers import slugify
 from db.roadmaps import update_roadmap, update_status
 from db.quizzes import save_quizzes
+
+
 def run_assembler(state) -> dict:
     try:
         hours_map = _build_hours_map(
@@ -49,14 +51,13 @@ def run_assembler(state) -> dict:
         try:
             update_status(state.roadmap_id, "failed", str(e))
         except Exception:
-            pass                                               
+            pass
         raise RuntimeError(f"Assembler failed: {e}") from e
+
+
 def _build_hours_map(topic_tree: dict, timeline: dict) -> dict:
     hours_map = {}
-    per_topic = {
-        entry["topic"]: entry.get("hours", 0)
-        for entry in timeline.get("per_topic", [])
-    }
+    per_topic = {entry["topic"]: entry.get("hours", 0) for entry in timeline.get("per_topic", [])}
     for topic in topic_tree.get("topics", []):
         topic_name = topic.get("name", "")
         subtopics = topic.get("subtopics", [])
@@ -70,6 +71,8 @@ def _build_hours_map(topic_tree: dict, timeline: dict) -> dict:
             if sub_id:
                 hours_map[sub_id] = hours_per_sub
     return hours_map
+
+
 def _merge_topics(
     topic_tree: dict,
     videos_data: dict,
@@ -98,28 +101,47 @@ def _merge_topics(
                 "description": sub.get("description", ""),
                 "hours_estimate": hours,
                 "videos": videos,
-                "text_resource": course.get("text_resource", _fallback_text(sub.get("name", ""), "")),
-                "free_course": course.get("free_course", _fallback_free_course(sub.get("name", ""))),
-                "paid_course": course.get("paid_course", _fallback_paid_course(sub.get("name", ""))),
-                "mini_project": proj.get("mini_project", _fallback_mini_project(sub.get("name", ""))),
-                "capstone_project": proj.get("capstone_project", _fallback_capstone(sub.get("name", ""), topic.get("name", ""))),
+                "text_resource": course.get(
+                    "text_resource", _fallback_text(sub.get("name", ""), "")
+                ),
+                "free_course": course.get(
+                    "free_course", _fallback_free_course(sub.get("name", ""))
+                ),
+                "paid_course": course.get(
+                    "paid_course", _fallback_paid_course(sub.get("name", ""))
+                ),
+                "mini_project": proj.get(
+                    "mini_project", _fallback_mini_project(sub.get("name", ""))
+                ),
+                "capstone_project": proj.get(
+                    "capstone_project",
+                    _fallback_capstone(sub.get("name", ""), topic.get("name", "")),
+                ),
             }
             merged_subtopics.append(merged_subtopic)
-        merged_topics.append({
-            "name": topic.get("name", ""),
-            "subtopics": merged_subtopics,
-        })
+        merged_topics.append(
+            {
+                "name": topic.get("name", ""),
+                "subtopics": merged_subtopics,
+            }
+        )
     return merged_topics
+
+
 def _fallback_text(sub_name: str, skill: str) -> dict:
     import urllib.parse
+
     q = urllib.parse.quote_plus(f"{skill} {sub_name} tutorial documentation".strip())
     return {
         "title": f"Search: {sub_name} documentation",
         "url": f"https://www.google.com/search?q={q}",
         "type": "article",
     }
+
+
 def _fallback_free_course(sub_name: str) -> dict:
     import urllib.parse
+
     q = urllib.parse.quote_plus(sub_name)
     return {
         "name": f"freeCodeCamp: {sub_name}",
@@ -127,8 +149,11 @@ def _fallback_free_course(sub_name: str) -> dict:
         "url": f"https://www.freecodecamp.org/search?query={q}",
         "certificate": False,
     }
+
+
 def _fallback_paid_course(sub_name: str) -> dict:
     import urllib.parse
+
     q = urllib.parse.quote_plus(sub_name)
     return {
         "name": f"Udemy: {sub_name}",
@@ -137,12 +162,16 @@ def _fallback_paid_course(sub_name: str) -> dict:
         "price": "~$15",
         "rating": "",
     }
+
+
 def _fallback_mini_project(sub_name: str) -> dict:
     return {
         "title": f"Practice: {sub_name}",
         "use_case": f"Apply {sub_name} concepts in a small real-world scenario.",
         "tutorial_video_url": "",
     }
+
+
 def _fallback_capstone(sub_name: str, topic_name: str) -> dict:
     return {
         "title": f"{topic_name} Capstone",

@@ -2,9 +2,14 @@ import streamlit as st
 from db.roadmaps import get_roadmap
 from db.progress import get_progress, mark_subtopic_done, mark_subtopic_undone
 from utils.helpers import (
-    format_level, format_weeks, format_hours,
-    pct_to_display, get_all_subtopic_ids, truncate_text
+    format_level,
+    format_weeks,
+    format_hours,
+    pct_to_display,
+    get_all_subtopic_ids,
+    truncate_text,
 )
+
 
 def render_roadmap() -> None:
 
@@ -48,6 +53,7 @@ def render_roadmap() -> None:
     st.divider()
     _render_final_quiz_cta(progress)
 
+
 def _render_header(roadmap: dict, overall_pct: float, total: int, done: int) -> None:
 
     col_back, col_title, col_actions = st.columns([1, 4, 2])
@@ -72,6 +78,7 @@ def _render_header(roadmap: dict, overall_pct: float, total: int, done: int) -> 
 
     st.progress(overall_pct, text=f"Overall Progress: {pct_to_display(overall_pct)}")
 
+
 def _render_summary_strip(roadmap: dict) -> None:
 
     timeline = roadmap.get("timeline") or {}
@@ -82,6 +89,7 @@ def _render_summary_strip(roadmap: dict) -> None:
     c2.metric("📅 Hours/Week", f"{timeline.get('hours_per_week', 10)}h")
     c3.metric("💰 Free Path", budget.get("free_path_total", "$0"))
     c4.metric("💳 Paid Path", budget.get("paid_path_total", "~$30-60"))
+
 
 def _render_topic(
     topic: dict,
@@ -104,11 +112,9 @@ def _render_topic(
 
     with st.expander(label, expanded=False):
         for subtopic in subtopics:
-            _render_subtopic(
-                subtopic, completed, progress,
-                user_id, roadmap_id, total_subtopics
-            )
+            _render_subtopic(subtopic, completed, progress, user_id, roadmap_id, total_subtopics)
             st.divider()
+
 
 def _render_subtopic(
     subtopic: dict,
@@ -133,7 +139,7 @@ def _render_subtopic(
             f"Mark '{sub_name}' as complete",
             value=is_done,
             key=f"check_{sub_id}",
-            label_visibility="collapsed",                                                          
+            label_visibility="collapsed",
         )
 
         if checked != is_done:
@@ -186,6 +192,7 @@ def _render_subtopic(
             subtopic.get("capstone_project", {}),
         )
 
+
 def _render_videos(videos: list) -> None:
 
     if not videos:
@@ -199,10 +206,8 @@ def _render_videos(videos: list) -> None:
         vtype = v.get("type", "video")
         icon = "▶️" if vtype == "video" else "📋"
 
-        st.markdown(
-            f"{icon} **[{title}]({url})**"
-            + (f"  •  *{channel}*" if channel else "")
-        )
+        st.markdown(f"{icon} **[{title}]({url})**" + (f"  •  *{channel}*" if channel else ""))
+
 
 def _render_text_resource(resource: dict) -> None:
 
@@ -215,6 +220,7 @@ def _render_text_resource(resource: dict) -> None:
     rtype = resource.get("type", "article").capitalize()
 
     st.markdown(f"📄 **{rtype}:** [{title}]({url})")
+
 
 def _render_courses(free: dict, paid: dict) -> None:
 
@@ -247,6 +253,7 @@ def _render_courses(free: dict, paid: dict) -> None:
         else:
             st.caption("No paid course found.")
 
+
 def _render_projects(mini: dict, capstone: dict) -> None:
 
     c1, c2 = st.columns(2)
@@ -270,6 +277,7 @@ def _render_projects(mini: dict, capstone: dict) -> None:
         else:
             st.caption("No capstone project designed.")
 
+
 def _render_final_quiz_cta(progress: dict) -> None:
 
     final_score = progress.get("final_quiz_score")
@@ -280,9 +288,7 @@ def _render_final_quiz_cta(progress: dict) -> None:
 
     if final_score is not None:
         badge = "✅ Passed" if final_passed else "❌ Failed"
-        st.markdown(
-            f"{badge} — Score: **{final_score}/{final_total}**"
-        )
+        st.markdown(f"{badge} — Score: **{final_score}/{final_total}**")
         if st.button("🔄 Retake Final Quiz", use_container_width=False):
             st.session_state.current_subtopic_id = "final"
             st.session_state.current_subtopic_name = "Final Quiz"
@@ -302,6 +308,7 @@ def _render_final_quiz_cta(progress: dict) -> None:
             st.session_state.current_subtopic_name = "Final Quiz"
             st.session_state.current_page = "quiz"
             st.rerun()
+
 
 def _get_cached_roadmap(roadmap_id: str) -> dict | None:
 

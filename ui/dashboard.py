@@ -3,6 +3,7 @@ from db.roadmaps import list_user_roadmaps, delete_roadmap
 from db.progress import get_progress
 from utils.helpers import format_level, format_status, time_ago, pct_to_display
 
+
 def render_dashboard() -> None:
 
     user_id = st.session_state.get("user_id")
@@ -13,7 +14,7 @@ def render_dashboard() -> None:
         st.title(f"👋 Welcome back, {user_name}!")
         st.caption("Your personalised learning roadmaps")
     with col_btn:
-        st.write("")                    
+        st.write("")
         if st.button("✨ New Roadmap", type="primary", use_container_width=True):
             st.session_state.current_page = "generate"
             st.rerun()
@@ -33,10 +34,7 @@ def render_dashboard() -> None:
 
     st.subheader(f"📋 Your Roadmaps ({len(roadmaps)})")
 
-    progress_map = {
-        r["_id"]: get_progress(user_id, r["_id"])
-        for r in roadmaps
-    }
+    progress_map = {r["_id"]: get_progress(user_id, r["_id"]) for r in roadmaps}
 
     cols = st.columns(2, gap="medium")
     for idx, roadmap in enumerate(roadmaps):
@@ -44,12 +42,14 @@ def render_dashboard() -> None:
         with col:
             _render_roadmap_card(roadmap, progress_map.get(roadmap["_id"], {}), user_id)
 
+
 def _render_stats(total: int, done: int) -> None:
 
     c1, c2, c3 = st.columns(3)
     c1.metric("Total Roadmaps", total)
     c2.metric("Completed Generation", done)
     c3.metric("In Progress", total - done)
+
 
 def _render_roadmap_card(roadmap: dict, progress: dict, user_id: str) -> None:
 
@@ -74,7 +74,7 @@ def _render_roadmap_card(roadmap: dict, progress: dict, user_id: str) -> None:
             st.progress(overall_pct, text=f"Progress: {pct_to_display(overall_pct)}")
         elif status == "generating":
             st.progress(0.0, text="⏳ Generating...")
-        else:          
+        else:
             st.progress(0.0, text="❌ Generation failed")
 
         created_at = roadmap.get("created_at")
@@ -129,6 +129,7 @@ def _render_roadmap_card(roadmap: dict, progress: dict, user_id: str) -> None:
                 ):
                     st.session_state[confirm_key] = True
                     st.rerun()
+
 
 def _render_empty_state() -> None:
 

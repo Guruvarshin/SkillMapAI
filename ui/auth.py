@@ -1,6 +1,7 @@
 import streamlit as st
 from db.users import register, login
 
+
 def init_auth_state() -> None:
 
     st.session_state.setdefault("logged_in", False)
@@ -8,26 +9,30 @@ def init_auth_state() -> None:
     st.session_state.setdefault("user_name", None)
     st.session_state.setdefault("user_email", None)
 
+
 def set_session(user: dict) -> None:
 
     st.session_state.logged_in = True
-    st.session_state.user_id   = user["_id"]
+    st.session_state.user_id = user["_id"]
     st.session_state.user_name = user["name"]
     st.session_state.user_email = user["email"]
+
 
 def clear_session() -> None:
 
     st.session_state.logged_in = False
-    st.session_state.user_id   = None
+    st.session_state.user_id = None
     st.session_state.user_name = None
     st.session_state.user_email = None
     st.session_state.pop("current_roadmap_id", None)
     st.session_state.pop("current_roadmap", None)
     st.session_state.pop("current_page", None)
 
+
 def is_logged_in() -> bool:
 
     return bool(st.session_state.get("logged_in", False))
+
 
 def render_auth() -> None:
 
@@ -48,6 +53,7 @@ def render_auth() -> None:
 
         with register_tab:
             _render_register_form()
+
 
 def _render_login_form() -> None:
 
@@ -88,6 +94,7 @@ def _render_login_form() -> None:
             set_session(user)
             st.success(f"Welcome back, {user['name']}!")
             st.rerun()
+
 
 def _render_register_form() -> None:
 
@@ -140,6 +147,7 @@ def _render_register_form() -> None:
             set_session(result)
             st.success(f"Account created! Welcome, {result['name']}!")
             st.rerun()
+
 
 def _validate_register_inputs(
     name: str,

@@ -1,6 +1,15 @@
 import json
 from crewai import Agent, Task, Crew, Process
-from utils.helpers import extract_json, extract_crew_result, load_agent_config, load_task_config, get_reasoning_llm, slugify
+from utils.helpers import (
+    extract_json,
+    extract_crew_result,
+    load_agent_config,
+    load_task_config,
+    get_reasoning_llm,
+    slugify,
+)
+
+
 def build_architect_agent() -> Agent:
     cfg = load_agent_config("architect")
     return Agent(
@@ -11,6 +20,8 @@ def build_architect_agent() -> Agent:
         verbose=cfg.get("verbose", False),
         allow_delegation=cfg.get("allow_delegation", False),
     )
+
+
 def build_architect_task(agent: Agent, skill: str, level: str) -> Task:
     cfg = load_task_config("architect_task")
     description = cfg["description"].format(skill=skill, level=level)
@@ -20,9 +31,11 @@ def build_architect_task(agent: Agent, skill: str, level: str) -> Task:
         expected_output=expected_output,
         agent=agent,
     )
+
+
 def run_architect(skill: str, level: str) -> dict:
     agent = build_architect_agent()
-    for attempt in range(1, 3):                  
+    for attempt in range(1, 3):
         try:
             task = build_architect_task(agent, skill, level)
             if attempt == 2:
@@ -45,7 +58,9 @@ def run_architect(skill: str, level: str) -> dict:
             total_subtopics = sum(len(t.get("subtopics", [])) for t in topics)
             if not topics or total_subtopics == 0:
                 raw_preview = str(getattr(result, "raw", ""))[:400]
-                print(f"[Architect] Invalid output (topics={len(topics)}, subtopics={total_subtopics}). Raw:\n{raw_preview}")
+                print(
+                    f"[Architect] Invalid output (topics={len(topics)}, subtopics={total_subtopics}). Raw:\n{raw_preview}"
+                )
                 raise ValueError(
                     f"Architect returned {len(topics)} topics with {total_subtopics} subtopics — need at least 1 subtopic"
                 )
@@ -53,10 +68,10 @@ def run_architect(skill: str, level: str) -> dict:
             return validated_tree
         except Exception as e:
             if attempt == 2:
-                raise RuntimeError(
-                    f"Architect agent failed after {attempt} attempts: {e}"
-                ) from e
+                raise RuntimeError(f"Architect agent failed after {attempt} attempts: {e}") from e
             print(f"[Architect] Attempt {attempt} failed: {e}. Retrying...")
+
+
 def _ensure_subtopic_ids(topic_tree: dict) -> dict:
     seen_ids = set()
     for topic in topic_tree.get("topics", []):

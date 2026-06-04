@@ -4,6 +4,7 @@ import streamlit as st
 from db.roadmaps import save_roadmap, update_status
 from agents.flow import run_skillmap_flow, get_progress_updates
 
+
 def render_generate() -> None:
 
     st.title("✨ Generate Your Roadmap")
@@ -18,6 +19,7 @@ def render_generate() -> None:
         return
 
     _render_input_form()
+
 
 def _render_input_form() -> None:
 
@@ -66,6 +68,7 @@ def _render_input_form() -> None:
 
         _run_generation(skill, level)
 
+
 def _run_generation(skill: str, level: str) -> None:
 
     user_id = st.session_state.get("user_id")
@@ -82,8 +85,9 @@ def _run_generation(skill: str, level: str) -> None:
 
     if success:
         st.session_state.current_page = "roadmap"
-        st.session_state.pop("current_roadmap", None)                    
+        st.session_state.pop("current_roadmap", None)
         st.rerun()
+
 
 def _run_with_status(
     skill: str,
@@ -132,8 +136,7 @@ def _run_with_status(
                 expanded=False,
             )
             st.success(
-                f"🎉 Your **{skill}** roadmap is ready! "
-                "Redirecting you to your roadmap..."
+                f"🎉 Your **{skill}** roadmap is ready! " "Redirecting you to your roadmap..."
             )
             time.sleep(1.5)
             return True
@@ -171,6 +174,7 @@ def _run_with_status(
 
             return False
 
+
 def _render_progress_log(container, updates: list[str]) -> None:
 
     if not updates:
@@ -180,6 +184,7 @@ def _render_progress_log(container, updates: list[str]) -> None:
         st.markdown("**Generation log:**")
         for msg in updates:
             st.markdown(f"- {msg}")
+
 
 def _render_generation_waiting() -> None:
 

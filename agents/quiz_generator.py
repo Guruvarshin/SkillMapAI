@@ -7,6 +7,8 @@ from utils.helpers import (
     extract_json,
     slugify,
 )
+
+
 def build_quiz_generator_agent() -> Agent:
     cfg = load_agent_config("quiz_generator")
     return Agent(
@@ -17,15 +19,15 @@ def build_quiz_generator_agent() -> Agent:
         verbose=cfg.get("verbose", False),
         allow_delegation=cfg.get("allow_delegation", False),
     )
+
+
 def build_quiz_task_for_topic(
     agent: Agent,
     topic: dict,
     skill: str,
 ) -> Task:
     cfg = load_task_config("quiz_generator_task")
-    single_topic_tree = json.dumps(
-        {"topics": [topic]}, separators=(",", ":")
-    )
+    single_topic_tree = json.dumps({"topics": [topic]}, separators=(",", ":"))
     description = cfg["description"].format(
         skill=skill,
         topic_tree=single_topic_tree,
@@ -41,6 +43,8 @@ def build_quiz_task_for_topic(
         expected_output=cfg["expected_output"],
         agent=agent,
     )
+
+
 def build_final_quiz_task(
     agent: Agent,
     topic_tree: dict,
@@ -65,6 +69,8 @@ def build_final_quiz_task(
         expected_output=cfg["expected_output"],
         agent=agent,
     )
+
+
 def run_quiz_generator(topic_tree: dict, skill: str) -> dict:
     topics = topic_tree.get("topics", [])
     if not topics:
@@ -109,7 +115,9 @@ def run_quiz_generator(topic_tree: dict, skill: str) -> dict:
         final_batch = _extract_quiz_result(final_result)
         final_questions = final_batch.get("final", [])
         if len(final_questions) < 5:
-            print(f"[QuizGenerator] Final quiz only has {len(final_questions)} questions, using fallback")
+            print(
+                f"[QuizGenerator] Final quiz only has {len(final_questions)} questions, using fallback"
+            )
             final_questions = _build_final_quiz_fallback(topic_tree, skill)
     except Exception as e:
         print(f"[QuizGenerator] Final quiz failed: {e}")
@@ -118,9 +126,14 @@ def run_quiz_generator(topic_tree: dict, skill: str) -> dict:
         "subtopics": all_subtopic_questions,
         "final": final_questions,
     }
+
+
 def _extract_quiz_result(result) -> dict:
     from utils.helpers import extract_crew_result
+
     return extract_crew_result(result) or {}
+
+
 def _build_subtopic_fallbacks(topic: dict, skill: str) -> dict:
     fallback = {}
     for sub in topic.get("subtopics", []):
@@ -182,22 +195,26 @@ def _build_subtopic_fallbacks(topic: dict, skill: str) -> dict:
             },
         ]
     return fallback
+
+
 def _build_final_quiz_fallback(topic_tree: dict, skill: str) -> list:
     questions = []
     for topic in topic_tree.get("topics", []):
         topic_name = topic.get("name", "")
         if not topic_name:
             continue
-        questions.append({
-            "question": f"Explain the key concepts covered in '{topic_name}' for {skill}.",
-            "type": "open",
-            "options": [],
-            "answer": (
-                f"'{topic_name}' covers the essential skills needed for {skill} "
-                f"in this area. A strong understanding of these concepts is "
-                f"required for professional-level {skill} development."
-            ),
-        })
+        questions.append(
+            {
+                "question": f"Explain the key concepts covered in '{topic_name}' for {skill}.",
+                "type": "open",
+                "options": [],
+                "answer": (
+                    f"'{topic_name}' covers the essential skills needed for {skill} "
+                    f"in this area. A strong understanding of these concepts is "
+                    f"required for professional-level {skill} development."
+                ),
+            }
+        )
         if len(questions) >= 10:
             break
     return questions

@@ -50,6 +50,7 @@ st.set_page_config(
 # ENVIRONMENT CHECK
 # ─────────────────────────────────────────────
 
+
 def check_env_vars() -> None:
     """
     Verify all required environment variables are set.
@@ -74,14 +75,15 @@ def check_env_vars() -> None:
     if missing:
         st.error(
             "**⚠️ Missing API keys.** Add these to your `.env` file "
-            "(local) or Streamlit Cloud Secrets (deployed):\n\n"
-            + "\n".join(missing)
+            "(local) or Streamlit Cloud Secrets (deployed):\n\n" + "\n".join(missing)
         )
         st.stop()
+
 
 # ─────────────────────────────────────────────
 # SESSION STATE INITIALISATION
 # ─────────────────────────────────────────────
+
 
 def init_session_state() -> None:
     """
@@ -100,7 +102,7 @@ def init_session_state() -> None:
         "current_page": "dashboard",
         # Roadmap context
         "current_roadmap_id": None,
-        "current_roadmap": None,       # Cached roadmap doc
+        "current_roadmap": None,  # Cached roadmap doc
         # Generation state
         "generation_running": False,
         # Quiz context
@@ -110,9 +112,11 @@ def init_session_state() -> None:
     for key, value in defaults.items():
         st.session_state.setdefault(key, value)
 
+
 # ─────────────────────────────────────────────
 # AUTH RE-HYDRATION
 # ─────────────────────────────────────────────
+
 
 def rehydrate_session() -> None:
     """
@@ -134,6 +138,7 @@ def rehydrate_session() -> None:
     if user_id and not logged_in:
         # user_id exists but logged_in is False — re-verify from DB
         from db.users import get_user_by_id
+
         user = get_user_by_id(user_id)
         if user:
             st.session_state.logged_in = True
@@ -143,9 +148,11 @@ def rehydrate_session() -> None:
             # User no longer exists in DB — clear session
             st.session_state.user_id = None
 
+
 # ─────────────────────────────────────────────
 # SIDEBAR
 # ─────────────────────────────────────────────
+
 
 def render_sidebar() -> None:
     """
@@ -209,12 +216,15 @@ def render_sidebar() -> None:
         # ── Logout ───────────────────────────────────────────────────────────
         if st.button("🚪 Logout", use_container_width=True):
             from ui.auth import clear_session
+
             clear_session()
             st.rerun()
+
 
 # ─────────────────────────────────────────────
 # PAGE ROUTER
 # ─────────────────────────────────────────────
+
 
 def route_page() -> None:
     """
@@ -229,6 +239,7 @@ def route_page() -> None:
     # ── Not logged in → auth page ─────────────────────────────────────────────
     if not logged_in:
         from ui.auth import render_auth
+
         render_auth()
         return
 
@@ -238,39 +249,48 @@ def route_page() -> None:
         st.warning("Please select a roadmap from your dashboard first.")
         st.session_state.current_page = "dashboard"
         from ui.dashboard import render_dashboard
+
         render_dashboard()
         return
 
     # ── Page routing ──────────────────────────────────────────────────────────
     if current_page == "dashboard":
         from ui.dashboard import render_dashboard
+
         render_dashboard()
 
     elif current_page == "generate":
         from ui.generate import render_generate
+
         render_generate()
 
     elif current_page == "roadmap":
         from ui.roadmap_view import render_roadmap
+
         render_roadmap()
 
     elif current_page == "quiz":
         from ui.quiz_ui import render_quiz
+
         render_quiz()
 
     elif current_page == "projects":
         from ui.projects_view import render_projects
+
         render_projects()
 
     else:
         # Unknown page — fall back to dashboard
         st.session_state.current_page = "dashboard"
         from ui.dashboard import render_dashboard
+
         render_dashboard()
+
 
 # ─────────────────────────────────────────────
 # MAIN
 # ─────────────────────────────────────────────
+
 
 def main() -> None:
     """
@@ -284,6 +304,7 @@ def main() -> None:
     # 2. Ensure MongoDB indexes exist (idempotent — safe on every rerun)
     try:
         from db.mongo import ensure_indexes
+
         ensure_indexes()
     except Exception as e:
         st.error(f"❌ Database connection failed: {e}")
@@ -300,6 +321,7 @@ def main() -> None:
 
     # 6. Route to correct page
     route_page()
+
 
 # Streamlit executes this file on every rerun — call main() unconditionally.
 main()
