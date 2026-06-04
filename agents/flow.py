@@ -1,5 +1,12 @@
 import asyncio
+import sys
 import nest_asyncio
+
+# Fix WinError 10054 — Windows ProactorEventLoop teardown noise.
+# SelectorEventLoop does not have this issue.
+if sys.platform == "win32":
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
 from crewai.flow.flow import Flow, start, listen
 from agents.state import RoadmapState
 from agents.architect import run_architect

@@ -1,4 +1,5 @@
 import time
+import threading
 import streamlit as st
 
 from db.roadmaps import save_roadmap, update_status
@@ -6,7 +7,6 @@ from agents.flow import run_skillmap_flow, get_progress_updates
 
 
 def render_generate() -> None:
-
     st.title("✨ Generate Your Roadmap")
     st.markdown(
         "Enter a skill or job role and get a complete, personalised "
@@ -22,7 +22,6 @@ def render_generate() -> None:
 
 
 def _render_input_form() -> None:
-
     with st.form("generate_form"):
         st.subheader("What do you want to learn?")
 
@@ -70,7 +69,6 @@ def _render_input_form() -> None:
 
 
 def _run_generation(skill: str, level: str) -> None:
-
     user_id = st.session_state.get("user_id")
 
     with st.spinner("Creating your roadmap..."):
@@ -89,64 +87,91 @@ def _run_generation(skill: str, level: str) -> None:
         st.rerun()
 
 
-def _run_with_status(
-    skill: str,
-    level: str,
-    roadmap_id: str,
-    user_id: str,
-) -> bool:
+def _run_with_status(skill: str, level: str, roadmap_id: str, user_id: str) -> bool:
+    """
+    Run the flow in a background thread so the main Streamlit thread
+    can poll _progress_log and show live updates every 2 seconds.
+    """
+    result = {"success": False, "error": None}
 
-    with st.status(
-        f"🚀 Generating roadmap for: **{skill}**",
-        expanded=True,
-    ) as status:
-
-        st.markdown("**Stages:**")
-        stage1 = st.empty()
-        stage2 = st.empty()
-        stage3 = st.empty()
-        log_container = st.empty()
-
-        stage1.markdown("⏳ Stage 1: Building topic structure...")
-        stage2.markdown("⏳ Stage 2: Searching videos, courses, projects, quizzes...")
-        stage3.markdown("⏳ Stage 3: Assembling final roadmap...")
-
-        st.caption("Keep this tab open. Progress updates appear below.")
-        st.divider()
-
+    def _worker():
         try:
-
             run_skillmap_flow(
                 skill=skill,
                 level=level,
                 roadmap_id=roadmap_id,
                 user_id=user_id,
             )
+            result["success"] = True
+        except Exception as e:
+            result["error"] = e
 
+    thread = threading.Thread(target=_worker, daemon=True)
+    thread.start()
+
+    with st.status(f"🚀 Generating roadmap for: **{skill}**", expanded=True) as status:
+        st.markdown("**Stages:**")
+        stage1 = st.empty()
+        stage2 = st.empty()
+        stage3 = st.empty()
+        st.caption("Keep this tab open. Progress updates appear below.")
+        st.divider()
+        log_area = st.empty()
+
+        stage1.markdown("⏳ Stage 1: Building topic structure...")
+        stage2.markdown("⏳ Stage 2: Searching videos, courses, projects, quizzes...")
+        stage3.markdown("⏳ Stage 3: Assembling final roadmap...")
+
+        seen = 0
+
+        # Poll progress while the thread runs — updates every 2 seconds
+        while thread.is_alive():
             updates = get_progress_updates()
-            _render_progress_log(log_container, updates)
 
+            # Update stage labels based on what's been logged
+            all_text = " ".join(updates)
+            if "Stage 1 complete" in all_text:
+                stage1.markdown("✅ Stage 1: Topic structure built")
+            if "Stage 2 complete" in all_text:
+                stage2.markdown("✅ Stage 2: Resources found")
+            if "Stage 3" in all_text and "complete" in all_text.lower():
+                stage3.markdown("✅ Stage 3: Roadmap assembled and saved")
+
+            # Show any new log messages
+            new = updates[seen:]
+            if new:
+                seen = len(updates)
+                with log_area.container():
+                    for msg in updates:
+                        st.markdown(f"- {msg}")
+
+            time.sleep(2)
+
+        # Thread finished — final update
+        thread.join()
+        updates = get_progress_updates()
+        if updates:
+            with log_area.container():
+                for msg in updates:
+                    st.markdown(f"- {msg}")
+
+        if result["success"]:
             stage1.markdown("✅ Stage 1: Topic structure built")
             stage2.markdown("✅ Stage 2: Resources found")
             stage3.markdown("✅ Stage 3: Roadmap assembled and saved")
-
             status.update(
                 label=f"✅ Roadmap ready: **{skill}**",
                 state="complete",
                 expanded=False,
             )
-            st.success(
-                f"🎉 Your **{skill}** roadmap is ready! " "Redirecting you to your roadmap..."
-            )
+            st.success(f"🎉 Your **{skill}** roadmap is ready! Redirecting...")
             time.sleep(1.5)
             return True
 
-        except Exception as e:
+        else:
+            e = result["error"]
+            error_str = str(e) if e else "Unknown error"
 
-            updates = get_progress_updates()
-            _render_progress_log(log_container, updates)
-
-            error_str = str(e)
             if "Architect" in error_str or "Stage 1" in error_str:
                 stage1.markdown("❌ Stage 1: Failed to build topic structure")
             elif "Assembler" in error_str or "Stage 3" in error_str:
@@ -156,38 +181,21 @@ def _run_with_status(
             else:
                 stage2.markdown("❌ Stage 2: Resource search failed")
 
-            status.update(
-                label="❌ Generation failed",
-                state="error",
-                expanded=True,
-            )
+            status.update(label="❌ Generation failed", state="error", expanded=True)
             st.error(
-                f"**Generation failed:** {e}\n\n"
-                "Your skeleton roadmap has been saved with status 'failed'. "
+                f"**Generation failed:** {error_str}\n\n"
                 "Please try again. If the issue persists, check your API keys."
             )
 
             try:
-                update_status(roadmap_id, "failed", str(e))
+                update_status(roadmap_id, "failed", error_str)
             except Exception:
                 pass
 
             return False
 
 
-def _render_progress_log(container, updates: list[str]) -> None:
-
-    if not updates:
-        return
-
-    with container.container():
-        st.markdown("**Generation log:**")
-        for msg in updates:
-            st.markdown(f"- {msg}")
-
-
 def _render_generation_waiting() -> None:
-
     st.info(
         "⏳ **Generation in progress...**\n\n"
         "Your roadmap is being generated. "
