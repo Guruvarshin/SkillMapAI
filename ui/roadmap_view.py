@@ -73,39 +73,53 @@ def render_roadmap() -> None:
     _render_final_quiz_cta(progress)
 
 def _render_header(roadmap: dict, overall_pct: float, total: int, done: int) -> None:
+    level = roadmap.get("level", "beginner")
+    pct_int = int(overall_pct * 100)
+    level_colors = {"beginner": "#10B981", "intermediate": "#F59E0B", "advanced": "#EF4444"}
+    level_color = level_colors.get(level, "#8B5CF6")
 
-    col_back, col_title, col_actions = st.columns([1, 4, 2])
-
+    col_back, col_actions = st.columns([1, 1])
     with col_back:
-        if st.button("← Dashboard", use_container_width=True):
+        if st.button("← Dashboard", use_container_width=True, type="secondary"):
             st.session_state.current_page = "dashboard"
             st.rerun()
-
-    with col_title:
-        st.title(f"📋 {roadmap.get('skill', 'Roadmap')}")
-        st.caption(
-            f"{format_level(roadmap.get('level', 'beginner'))}  •  "
-            f"{done}/{total} subtopics complete"
-        )
-
     with col_actions:
-        st.write("")
-        if st.button("🚀 Projects", use_container_width=True):
+        if st.button("🚀 View Projects", use_container_width=True, type="secondary"):
             st.session_state.current_page = "projects"
             st.rerun()
 
-    st.progress(overall_pct, text=f"Overall Progress: {pct_to_display(overall_pct)}")
+    st.markdown(f"""
+    <div class="roadmap-header">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:1rem">
+            <div>
+                <div style="font-size: 1.8rem; font-weight: 800; color: #F9FAFB; margin-bottom: 8px">{roadmap.get('skill', 'Roadmap')}</div>
+                <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+                    <span style="background:rgba(255,255,255,0.05);border:1px solid #374151;border-radius:99px;padding:3px 12px;font-size:0.8rem;color:{level_color};font-weight:600;text-transform:capitalize">{level}</span>
+                    <span style="color:#6B7280;font-size:0.875rem">{done} of {total} subtopics complete</span>
+                </div>
+            </div>
+            <div style="text-align:right">
+                <div style="font-size:2.5rem;font-weight:800;background:linear-gradient(135deg,#8B5CF6,#06B6D4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">{pct_int}%</div>
+                <div style="font-size:0.75rem;color:#6B7280">Overall Progress</div>
+            </div>
+        </div>
+        <div style="margin-top:16px">
+            <div style="background:#1F2937;border-radius:99px;height:8px;overflow:hidden">
+                <div style="width:{pct_int}%;height:100%;background:linear-gradient(90deg,#7C3AED,#8B5CF6,#06B6D4);border-radius:99px;transition:width 0.5s ease"></div>
+            </div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
 
 def _render_summary_strip(roadmap: dict) -> None:
-
     timeline = roadmap.get("timeline") or {}
     budget = roadmap.get("budget") or {}
-
     c1, c2, c3, c4 = st.columns(4)
-    c1.metric("⏱️ Total Duration", format_weeks(timeline.get("total_weeks", 0)))
-    c2.metric("📅 Hours/Week", f"{timeline.get('hours_per_week', 10)}h")
+    c1.metric("⏱️ Duration", format_weeks(timeline.get("total_weeks", 0)))
+    c2.metric("📅 Pace", f"{timeline.get('hours_per_week', 10)}h/week")
     c3.metric("💰 Free Path", budget.get("free_path_total", "$0"))
-    c4.metric("💳 Paid Path", budget.get("paid_path_total", "~$30-60"))
+    c4.metric("💳 Paid Path", budget.get("paid_path_total", "~$30"))
 
 def _render_topic(
     topic: dict,

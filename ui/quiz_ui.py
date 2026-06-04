@@ -167,16 +167,6 @@ def _score_and_save(
     roadmap_id: str,
     user_id: str,
 ) -> None:
-\
-\
-\
-\
-\
-\
-\
-\
-\
-\
 
     score = 0
     total_mcq = len(mcq_questions)
@@ -240,14 +230,6 @@ def _score_and_save(
     st.session_state.pop(f"retake_{subtopic_id}", None)
 
 def _render_prior_result(prior_score, subtopic_id: str, questions: list) -> None:
-\
-\
-\
-\
-\
-\
-\
-
     if isinstance(prior_score, dict):
         score = prior_score.get("score", 0)
         total = prior_score.get("total", len(questions))

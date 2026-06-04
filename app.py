@@ -160,59 +160,60 @@ def render_sidebar() -> None:
     Navigation buttons update session_state.current_page + st.rerun().
     """
     with st.sidebar:
-        st.markdown("# 🗺️ SkillMap AI")
-        st.caption("Your AI-powered learning companion")
-        st.divider()
+        st.markdown("""
+        <div style="padding: 1rem 0 0.5rem">
+            <div class="sidebar-logo">🗺️ SkillMap AI</div>
+            <div style="font-size:0.72rem;color:#6B7280;margin-top:2px">AI-powered learning roadmaps</div>
+        </div>
+        <div style="height:1px;background:#1F2937;margin-bottom:1rem"></div>
+        """, unsafe_allow_html=True)
 
         if not st.session_state.get("logged_in"):
-            st.info("Login or create an account to get started.")
+            st.markdown('<div class="empty-desc" style="font-size:0.85rem;color:#6B7280;padding:1rem 0">Sign in to start learning</div>', unsafe_allow_html=True)
             return
 
-        # ── Logged-in navigation ─────────────────────────────────────────────
         user_name = st.session_state.get("user_name", "User")
-        st.markdown(f"👤 **{user_name}**")
-        st.divider()
+        initials = "".join(w[0].upper() for w in user_name.split()[:2])
+        st.markdown(f"""
+        <div style="display:flex;align-items:center;gap:10px;padding:8px 0 16px">
+            <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#7C3AED,#06B6D4);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.85rem;color:white;flex-shrink:0">{initials}</div>
+            <div>
+                <div style="font-weight:600;color:#F9FAFB;font-size:0.9rem">{user_name}</div>
+                <div style="font-size:0.75rem;color:#6B7280">Learner</div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
 
-        # Main navigation
-        nav_items = [
-            ("🏠 Dashboard", "dashboard"),
-            ("✨ Generate Roadmap", "generate"),
-        ]
-
-        # Show roadmap-specific nav if a roadmap is selected
+        nav_items = [("🏠  Dashboard", "dashboard"), ("✨  Generate Roadmap", "generate")]
         if st.session_state.get("current_roadmap_id"):
-            nav_items += [
-                ("📋 My Roadmap", "roadmap"),
-                ("🚀 Projects", "projects"),
-                ("❓ Quiz", "quiz"),
-            ]
+            nav_items += [("📋  My Roadmap", "roadmap"), ("🚀  Projects", "projects"), ("❓  Quiz", "quiz")]
 
         for label, page in nav_items:
             is_active = st.session_state.get("current_page") == page
-            if st.button(
-                label,
-                key=f"nav_{page}",
-                use_container_width=True,
-                type="primary" if is_active else "secondary",
-            ):
+            if st.button(label, key=f"nav_{page}", use_container_width=True, type="primary" if is_active else "secondary"):
                 if page == "quiz" and not st.session_state.get("current_subtopic_id"):
-                    # Quiz needs a subtopic — go to final quiz by default
                     st.session_state.current_subtopic_id = "final"
                     st.session_state.current_subtopic_name = "Final Quiz"
                 st.session_state.current_page = page
                 st.rerun()
 
-        st.divider()
-
-        # ── Current roadmap info ─────────────────────────────────────────────
         current_roadmap = st.session_state.get("current_roadmap")
         if current_roadmap:
+            st.markdown('<div style="margin-top:1rem;border-top:1px solid #1F2937;padding-top:1rem"></div>', unsafe_allow_html=True)
             skill = current_roadmap.get("skill", "")
-            st.caption(f"📋 Current: **{skill}**")
-            st.divider()
+            level = current_roadmap.get("level", "")
+            level_colors = {"beginner": "#10B981", "intermediate": "#F59E0B", "advanced": "#EF4444"}
+            color = level_colors.get(level, "#8B5CF6")
+            st.markdown(f"""
+            <div style="background:#111827;border:1px solid #1F2937;border-radius:10px;padding:10px 12px">
+                <div style="font-size:0.7rem;color:#6B7280;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px">Current Roadmap</div>
+                <div style="font-weight:600;color:#F9FAFB;font-size:0.875rem">{skill}</div>
+                <div style="font-size:0.72rem;color:{color};margin-top:2px;text-transform:capitalize">{level}</div>
+            </div>
+            """, unsafe_allow_html=True)
 
-        # ── Logout ───────────────────────────────────────────────────────────
-        if st.button("🚪 Logout", use_container_width=True):
+        st.markdown('<div style="margin-top:auto;padding-top:1.5rem;border-top:1px solid #1F2937;margin-top:2rem"></div>', unsafe_allow_html=True)
+        if st.button("↩  Logout", use_container_width=True, type="secondary"):
             from ui.auth import clear_session
             clear_session()
             st.rerun()
@@ -285,7 +286,9 @@ def main() -> None:
 
     Execution order is strict — do not reorder these calls.
     """
-    # 1. Check API keys are set (fail fast with clear message)
+    from ui.styles import inject_css
+    inject_css()
+
     check_env_vars()
 
     # 2. Ensure MongoDB indexes exist (idempotent — safe on every rerun)
