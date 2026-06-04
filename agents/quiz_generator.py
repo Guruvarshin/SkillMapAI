@@ -1,37 +1,5 @@
-\
-\
-\
-\
-\
-\
-\
-\
-\
-\
-\
-\
-\
-\
-\
-\
-\
-\
-\
-\
-\
-\
-\
-\
-\
-\
-\
-\
-\
-\
-
 import json
 from crewai import Agent, Task, Crew, Process
-
 from utils.helpers import (
     load_agent_config,
     load_task_config,
@@ -39,19 +7,8 @@ from utils.helpers import (
     extract_json,
     slugify,
 )
-
 def build_quiz_generator_agent() -> Agent:
-\
-\
-\
-\
-\
-\
-\
-\
-
     cfg = load_agent_config("quiz_generator")
-
     return Agent(
         role=cfg["role"],
         goal=cfg["goal"],
@@ -60,74 +17,37 @@ def build_quiz_generator_agent() -> Agent:
         verbose=cfg.get("verbose", False),
         allow_delegation=cfg.get("allow_delegation", False),
     )
-
 def build_quiz_task_for_topic(
     agent: Agent,
     topic: dict,
     skill: str,
 ) -> Task:
-\
-\
-\
-\
-\
-\
-\
-\
-\
-\
-\
-\
-\
-
     cfg = load_task_config("quiz_generator_task")
-
     single_topic_tree = json.dumps(
         {"topics": [topic]}, separators=(",", ":")
     )
-
     description = cfg["description"].format(
         skill=skill,
         topic_tree=single_topic_tree,
     )
-
     description += (
         "\n\nIMPORTANT: Generate EXACTLY 5 questions per subtopic "
         "(3 MCQ + 2 open-ended) for the subtopics in this single topic only. "
         "Do NOT generate the final_quiz in this call — "
         "return an empty list [] for the 'final' key."
     )
-
     return Task(
         description=description,
         expected_output=cfg["expected_output"],
         agent=agent,
-
     )
-
 def build_final_quiz_task(
     agent: Agent,
     topic_tree: dict,
     skill: str,
 ) -> Task:
-\
-\
-\
-\
-\
-\
-\
-\
-\
-\
-\
-\
-\
-
     cfg = load_task_config("quiz_generator_task")
-
     topic_tree_json = json.dumps(topic_tree, separators=(",", ":"))
-
     description = (
         f"Generate a comprehensive final quiz for the skill: '{skill}'.\n\n"
         f"Full topic tree for context:\n{topic_tree_json}\n\n"
@@ -140,43 +60,18 @@ def build_final_quiz_task(
         "Return format:\n"
         '{"subtopics": {}, "final": [<10 questions>]}'
     )
-
     return Task(
         description=description,
         expected_output=cfg["expected_output"],
         agent=agent,
-
     )
-
 def run_quiz_generator(topic_tree: dict, skill: str) -> dict:
-\
-\
-\
-\
-\
-\
-\
-\
-\
-\
-\
-\
-\
-\
-\
-\
-\
-\
-\
-
     topics = topic_tree.get("topics", [])
     if not topics:
         return {"subtopics": {}, "final": []}
-
     agent = build_quiz_generator_agent()
     all_subtopic_questions = {}
     final_questions = []
-
     for topic in topics:
         topic_name = topic.get("name", "Unknown")
         try:
@@ -188,25 +83,20 @@ def run_quiz_generator(topic_tree: dict, skill: str) -> dict:
                 verbose=False,
             )
             result = crew.kickoff()
-
             batch = _extract_quiz_result(result)
             if batch and batch.get("subtopics"):
-
                 normalised = {
                     slugify(k) if not k.replace("-", "").isalnum() else k: v
                     for k, v in batch["subtopics"].items()
                 }
                 all_subtopic_questions.update(normalised)
             else:
-
                 fallback = _build_subtopic_fallbacks(topic, skill)
                 all_subtopic_questions.update(fallback)
-
         except Exception as e:
             print(f"[QuizGenerator] Topic '{topic_name}' failed: {e}")
             fallback = _build_subtopic_fallbacks(topic, skill)
             all_subtopic_questions.update(fallback)
-
     try:
         final_task = build_final_quiz_task(agent, topic_tree, skill)
         final_crew = Crew(
@@ -218,55 +108,24 @@ def run_quiz_generator(topic_tree: dict, skill: str) -> dict:
         final_result = final_crew.kickoff()
         final_batch = _extract_quiz_result(final_result)
         final_questions = final_batch.get("final", [])
-
         if len(final_questions) < 5:
             print(f"[QuizGenerator] Final quiz only has {len(final_questions)} questions, using fallback")
             final_questions = _build_final_quiz_fallback(topic_tree, skill)
-
     except Exception as e:
         print(f"[QuizGenerator] Final quiz failed: {e}")
         final_questions = _build_final_quiz_fallback(topic_tree, skill)
-
     return {
         "subtopics": all_subtopic_questions,
         "final": final_questions,
     }
-
 def _extract_quiz_result(result) -> dict:
-\
-\
-\
-\
-\
-\
-\
-\
-\
-\
-
     from utils.helpers import extract_crew_result
     return extract_crew_result(result) or {}
-
 def _build_subtopic_fallbacks(topic: dict, skill: str) -> dict:
-\
-\
-\
-\
-\
-\
-\
-\
-\
-\
-\
-\
-
     fallback = {}
-
     for sub in topic.get("subtopics", []):
         sub_id = sub.get("id", slugify(sub.get("name", "topic")))
         sub_name = sub.get("name", sub_id)
-
         fallback[sub_id] = [
             {
                 "question": f"Which of the following best describes {sub_name}?",
@@ -322,30 +181,13 @@ def _build_subtopic_fallbacks(topic: dict, skill: str) -> dict:
                 ),
             },
         ]
-
     return fallback
-
 def _build_final_quiz_fallback(topic_tree: dict, skill: str) -> list:
-\
-\
-\
-\
-\
-\
-\
-\
-\
-\
-\
-\
-
     questions = []
-
     for topic in topic_tree.get("topics", []):
         topic_name = topic.get("name", "")
         if not topic_name:
             continue
-
         questions.append({
             "question": f"Explain the key concepts covered in '{topic_name}' for {skill}.",
             "type": "open",
@@ -356,8 +198,6 @@ def _build_final_quiz_fallback(topic_tree: dict, skill: str) -> list:
                 f"required for professional-level {skill} development."
             ),
         })
-
         if len(questions) >= 10:
             break
-
     return questions

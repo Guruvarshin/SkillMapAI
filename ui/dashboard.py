@@ -2,11 +2,9 @@ import streamlit as st
 from db.roadmaps import list_user_roadmaps, delete_roadmap
 from db.progress import get_progress
 from utils.helpers import time_ago, pct_to_display
-
 def render_dashboard() -> None:
     user_id = st.session_state.get("user_id")
     user_name = st.session_state.get("user_name", "there")
-
     col_title, col_btn = st.columns([3, 1])
     with col_title:
         st.markdown(f"""
@@ -20,19 +18,15 @@ def render_dashboard() -> None:
         if st.button("✨ New Roadmap", type="primary", use_container_width=True):
             st.session_state.current_page = "generate"
             st.rerun()
-
     with st.spinner(""):
         roadmaps = list_user_roadmaps(user_id)
-
     if not roadmaps:
         _render_empty_state()
         return
-
     done_count = sum(1 for r in roadmaps if r.get("status") == "done")
     in_progress = sum(1 for r in roadmaps if r.get("status") == "generating")
     total_pct = sum(get_progress(user_id, r["_id"]).get("overall_pct", 0) for r in roadmaps if r.get("status") == "done")
     avg_pct = (total_pct / done_count * 100) if done_count else 0
-
     c1, c2, c3, c4 = st.columns(4)
     for col, num, label in [
         (c1, len(roadmaps), "Total Roadmaps"),
@@ -46,16 +40,12 @@ def render_dashboard() -> None:
             <div class="stat-label">{label}</div>
         </div>
         """, unsafe_allow_html=True)
-
     st.markdown("<div style='margin: 1.5rem 0 1rem'><span style='font-size:1.1rem;font-weight:700;color:#F9FAFB'>Your Roadmaps</span> <span style='color:#6B7280;font-size:0.875rem'>({} total)</span></div>".format(len(roadmaps)), unsafe_allow_html=True)
-
     progress_map = {r["_id"]: get_progress(user_id, r["_id"]) for r in roadmaps}
     cols = st.columns(2, gap="medium")
     for idx, roadmap in enumerate(roadmaps):
         with cols[idx % 2]:
             _render_roadmap_card(roadmap, progress_map.get(roadmap["_id"], {}), user_id)
-
-
 def _render_roadmap_card(roadmap: dict, progress: dict, user_id: str) -> None:
     status = roadmap.get("status", "done")
     roadmap_id = roadmap["_id"]
@@ -64,16 +54,13 @@ def _render_roadmap_card(roadmap: dict, progress: dict, user_id: str) -> None:
     level_class = f"level-{level}"
     level_icons = {"beginner": "🟢", "intermediate": "🟡", "advanced": "🔴"}
     icon = level_icons.get(level, "⚪")
-
     status_html = {
         "done": '<span class="done-pill">✓ Ready</span>',
         "generating": '<span class="generating-pill">⏳ Generating</span>',
         "failed": '<span class="failed-pill">✕ Failed</span>',
     }.get(status, "")
-
     pct_int = int(overall_pct * 100)
     time_str = time_ago(roadmap.get("created_at"))
-
     st.markdown(f"""
     <div class="roadmap-card">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">
@@ -93,11 +80,9 @@ def _render_roadmap_card(roadmap: dict, progress: dict, user_id: str) -> None:
         <div style="font-size:0.75rem;color:#4B5563;margin-top:8px">{time_str}</div>
     </div>
     """, unsafe_allow_html=True)
-
     if status == "failed" and roadmap.get("error_message"):
         with st.expander("⚠️ See error"):
             st.code(roadmap["error_message"], language=None)
-
     btn_col1, btn_col2 = st.columns([3, 1])
     with btn_col1:
         if st.button("📋 View Roadmap" if status == "done" else "⏳ Generating...",
@@ -120,8 +105,6 @@ def _render_roadmap_card(roadmap: dict, progress: dict, user_id: str) -> None:
                 st.session_state[confirm_key] = True
                 st.rerun()
     st.markdown("<div style='margin-bottom:8px'></div>", unsafe_allow_html=True)
-
-
 def _render_empty_state() -> None:
     st.markdown("""
     <div class="empty-state">

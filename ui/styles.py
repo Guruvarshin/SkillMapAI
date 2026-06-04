@@ -1,5 +1,4 @@
 import streamlit as st
-
 def inject_css():
     st.markdown("""
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -34,7 +33,6 @@ hr { border-color: #1F2937 !important; margin: 1.5rem 0 !important; }
 ::-webkit-scrollbar-track { background: #111827; }
 ::-webkit-scrollbar-thumb { background: #374151; border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: #8B5CF6; }
-
 .gradient-text { background: linear-gradient(135deg, #8B5CF6, #06B6D4); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; font-weight: 800; }
 .hero-badge { display: inline-block; background: linear-gradient(135deg, rgba(124,58,237,0.2), rgba(6,182,212,0.2)); border: 1px solid rgba(139,92,246,0.3); border-radius: 99px; padding: 6px 16px; font-size: 0.8rem; font-weight: 600; color: #A78BFA; letter-spacing: 0.5px; text-transform: uppercase; }
 .sidebar-logo { font-size: 1.4rem; font-weight: 800; background: linear-gradient(135deg, #8B5CF6, #06B6D4); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }

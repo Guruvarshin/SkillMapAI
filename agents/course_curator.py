@@ -1,54 +1,14 @@
-\
-\
-\
-\
-\
-\
-\
-\
-\
-\
-\
-\
-\
-\
-\
-\
-\
-\
-\
-
 import json
 import urllib.parse
 from utils.helpers import slugify
 from tools.tavily_tool import TavilyTool
-
 def run_course_curator(topic_tree: dict, skill: str) -> dict:
-\
-\
-\
-\
-\
-\
-\
-\
-\
-\
-\
-\
-\
-\
-\
-\
-
     tool = TavilyTool()
     results = {}
-
     for topic in topic_tree.get("topics", []):
         for subtopic in topic.get("subtopics", []):
             sub_id = subtopic.get("id", slugify(subtopic.get("name", "topic")))
             sub_name = subtopic.get("name", "")
-
             try:
                 raw = tool._run(
                     query=f"{skill} {sub_name} tutorial documentation guide",
@@ -57,7 +17,6 @@ def run_course_curator(topic_tree: dict, skill: str) -> dict:
                 text_resource = json.loads(raw)
             except Exception:
                 text_resource = _fallback_text(sub_name, skill)
-
             try:
                 raw = tool._run(
                     query=f"{skill} {sub_name} free course certificate",
@@ -66,7 +25,6 @@ def run_course_curator(topic_tree: dict, skill: str) -> dict:
                 free_course = json.loads(raw)
             except Exception:
                 free_course = _fallback_free_course(sub_name)
-
             try:
                 raw = tool._run(
                     query=f"{skill} {sub_name} course Udemy",
@@ -75,15 +33,12 @@ def run_course_curator(topic_tree: dict, skill: str) -> dict:
                 paid_course = json.loads(raw)
             except Exception:
                 paid_course = _fallback_paid_course(sub_name, skill)
-
             results[sub_id] = {
                 "text_resource": text_resource,
                 "free_course":   free_course,
                 "paid_course":   paid_course,
             }
-
     return results
-
 def _fallback_text(sub_name: str, skill: str) -> dict:
     q = urllib.parse.quote_plus(f"{skill} {sub_name} tutorial documentation")
     return {
@@ -92,7 +47,6 @@ def _fallback_text(sub_name: str, skill: str) -> dict:
         "type": "article",
         "source": "google_fallback",
     }
-
 def _fallback_free_course(sub_name: str) -> dict:
     q = urllib.parse.quote_plus(sub_name)
     return {
@@ -102,7 +56,6 @@ def _fallback_free_course(sub_name: str) -> dict:
         "certificate": False,
         "source": "fcc_fallback",
     }
-
 def _fallback_paid_course(sub_name: str, skill: str) -> dict:
     q = urllib.parse.quote_plus(f"{skill} {sub_name}")
     return {
@@ -113,12 +66,7 @@ def _fallback_paid_course(sub_name: str, skill: str) -> dict:
         "rating": "",
         "source": "udemy_fallback",
     }
-
 def build_course_fallbacks(topic_tree: dict, skill: str) -> dict:
-\
-\
-\
-
     fallbacks = {}
     for topic in topic_tree.get("topics", []):
         for sub in topic.get("subtopics", []):
