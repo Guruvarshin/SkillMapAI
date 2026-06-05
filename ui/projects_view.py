@@ -29,7 +29,7 @@ def render_projects() -> None:
             st.session_state.current_page = "roadmap"
             st.rerun()
     with col_title:
-        st.title(f"🚀 Projects — {roadmap.get('skill', '')}")
+        st.title(f"🚀 Projects,{roadmap.get('skill', '')}")
         st.caption("Portfolio projects designed to reinforce and showcase your skills")
 
     st.divider()
@@ -57,7 +57,7 @@ def render_projects() -> None:
 def _render_major_project(major: dict) -> None:
 
     st.subheader("🏆 Major Portfolio Project")
-    st.caption("Your capstone project — build this to showcase full roadmap mastery")
+    st.caption("Your capstone project,build this to showcase full roadmap mastery")
 
     with st.container(border=True):
         st.markdown(f"## {major.get('title', 'Portfolio Project')}")

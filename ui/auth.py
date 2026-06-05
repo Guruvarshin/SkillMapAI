@@ -42,7 +42,7 @@ def render_auth() -> None:
         st.markdown("## 🗺️ SkillMap AI")
         st.markdown(
             "Generate a complete, personalised learning roadmap "
-            "for any skill — with videos, courses, projects, and quizzes."
+            "for any skill,with videos, courses, projects, and quizzes."
         )
         st.divider()
 

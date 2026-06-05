@@ -91,9 +91,9 @@ class YouTubeTool(BaseTool):
         except Exception as e:
             error_str = str(e).lower()
             if "quota" in error_str:
-                print(f"[YouTubeTool] API quota exceeded — falling back to Tavily")
+                print(f"[YouTubeTool] API quota exceeded,falling back to Tavily")
             else:
-                print(f"[YouTubeTool] API error: {e} — falling back to Tavily")
+                print(f"[YouTubeTool] API error: {e},falling back to Tavily")
             return None
 
     def _search_via_tavily(self, query: str, search_type: str) -> dict | None:

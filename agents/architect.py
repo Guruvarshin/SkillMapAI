@@ -62,7 +62,7 @@ def run_architect(skill: str, level: str) -> dict:
                     f"[Architect] Invalid output (topics={len(topics)}, subtopics={total_subtopics}). Raw:\n{raw_preview}"
                 )
                 raise ValueError(
-                    f"Architect returned {len(topics)} topics with {total_subtopics} subtopics — need at least 1 subtopic"
+                    f"Architect returned {len(topics)} topics with {total_subtopics} subtopics,need at least 1 subtopic"
                 )
             validated_tree = _ensure_subtopic_ids(parsed)
             return validated_tree

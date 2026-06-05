@@ -142,7 +142,7 @@ Requirements:
 - tech_stack: List of 4-6 specific technologies/libraries from the {skill} ecosystem
 - features: List of 5-7 key features that demonstrate different parts of the roadmap
 - github_structure: Suggested folder structure as a single string (e.g. "src/ components/ hooks/ api/ tests/")
-This must be genuinely impressive — not a to-do app, not a tutorial clone.
+This must be genuinely impressive,not a to-do app, not a tutorial clone.
 It should solve a real problem and showcase advanced {skill} skills.
 Return ONLY valid JSON. No markdown. No explanation. No code fences.
 Return format:

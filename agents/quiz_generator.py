@@ -35,7 +35,7 @@ def build_quiz_task_for_topic(
     description += (
         "\n\nIMPORTANT: Generate EXACTLY 5 questions per subtopic "
         "(3 MCQ + 2 open-ended) for the subtopics in this single topic only. "
-        "Do NOT generate the final_quiz in this call — "
+        "Do NOT generate the final_quiz in this call,"
         "return an empty list [] for the 'final' key."
     )
     return Task(

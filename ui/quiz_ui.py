@@ -21,10 +21,10 @@ def render_quiz() -> None:
     with col_title:
         if subtopic_id == "final":
             st.title("🎓 Final Quiz")
-            st.caption("Comprehensive quiz covering the entire roadmap — 10 questions")
+            st.caption("Comprehensive quiz covering the entire roadmap,10 questions")
         else:
             st.title(f"❓ {subtopic_name}")
-            st.caption("5 questions — 3 MCQ (auto-scored) + 2 open-ended (self-assessed)")
+            st.caption("5 questions,3 MCQ (auto-scored) + 2 open-ended (self-assessed)")
 
     st.divider()
 
@@ -173,13 +173,13 @@ def _score_and_save(
         st.metric(
             "Score",
             f"{score}/{total_mcq}",
-            delta=f"{pct:.0f}% — {badge}",
+            delta=f"{pct:.0f}%,{badge}",
             delta_color="normal" if passed else "inverse",
         )
 
     if open_questions:
         st.markdown("---")
-        st.markdown("**Open-Ended — Model Answers:**")
+        st.markdown("**Open-Ended,Model Answers:**")
         for i, q in enumerate(open_questions):
             st.markdown(f"**Q{total_mcq + i + 1}:** {q.get('question', '')}")
             with st.expander("💡 Show model answer"):
@@ -209,7 +209,7 @@ def _render_prior_result(prior_score, subtopic_id: str, questions: list) -> None
         passed = (score / total >= 0.7) if total > 0 else False
 
     badge = "🎉 Passed" if passed else "📚 Not passed"
-    st.info(f"**Previous score:** {score}/{total} — {badge}")
+    st.info(f"**Previous score:** {score}/{total},{badge}")
 
 
 def _back_button() -> None:

@@ -288,7 +288,7 @@ def _render_final_quiz_cta(progress: dict) -> None:
 
     if final_score is not None:
         badge = "✅ Passed" if final_passed else "❌ Failed"
-        st.markdown(f"{badge} — Score: **{final_score}/{final_total}**")
+        st.markdown(f"{badge},Score: **{final_score}/{final_total}**")
         if st.button("🔄 Retake Final Quiz", use_container_width=False):
             st.session_state.current_subtopic_id = "final"
             st.session_state.current_subtopic_name = "Final Quiz"

@@ -2,8 +2,6 @@ import asyncio
 import sys
 import nest_asyncio
 
-# Fix WinError 10054 — Windows ProactorEventLoop teardown noise.
-# SelectorEventLoop does not have this issue.
 if sys.platform == "win32":
     asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
@@ -58,7 +56,7 @@ class SkillMapFlow(Flow[RoadmapState]):
     async def stage_2_parallel(self) -> None:
         _push_update("🔍 Stage 2: Searching for resources, projects, quizzes...")
         if not self.state.has_topic_tree():
-            _push_update("⚠️  Stage 2 skipped — no topic tree from Stage 1")
+            _push_update("⚠️  Stage 2 skipped,no topic tree from Stage 1")
             return
         topic_tree = self.state.topic_tree
         skill = self.state.skill
@@ -97,7 +95,7 @@ class SkillMapFlow(Flow[RoadmapState]):
         for name, result in zip(worker_names, results):
             if isinstance(result, Exception):
                 self.state.add_error(f"{name} failed: {result}")
-                _push_update(f"⚠️  {name} failed — using fallback data")
+                _push_update(f"⚠️  {name} failed,using fallback data")
         _push_update("✅ Stage 2 complete: all resources gathered")
 
     @listen(stage_2_parallel)
@@ -111,7 +109,7 @@ class SkillMapFlow(Flow[RoadmapState]):
                 f"✅ Roadmap complete! {subtopic_count} subtopics with "
                 f"videos, courses, projects, and quizzes."
             )
-            self.state.log("Assembler complete — roadmap saved to MongoDB")
+            self.state.log("Assembler complete,roadmap saved to MongoDB")
         except Exception as e:
             error_msg = f"Assembler failed: {e}"
             _push_update(f"❌ Stage 3 failed: {error_msg}")

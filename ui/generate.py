@@ -35,9 +35,9 @@ def _render_input_form() -> None:
             "Your current level",
             options=["beginner", "intermediate", "advanced"],
             format_func=lambda x: {
-                "beginner": "🟢 Beginner — little or no experience",
-                "intermediate": "🟡 Intermediate — some experience, want to go deeper",
-                "advanced": "🔴 Advanced — experienced, want to master edge cases",
+                "beginner": "🟢 Beginner,little or no experience",
+                "intermediate": "🟡 Intermediate,some experience, want to go deeper",
+                "advanced": "🔴 Advanced,experienced, want to master edge cases",
             }[x],
         )
 
@@ -59,7 +59,7 @@ def _render_input_form() -> None:
             st.error("Please enter a skill or job role.")
             return
         if len(skill) < 3:
-            st.error("Please be more specific — at least 3 characters.")
+            st.error("Please be more specific,at least 3 characters.")
             return
         if len(skill) > 100:
             st.error("Skill name too long. Please keep it under 100 characters.")
@@ -88,10 +88,6 @@ def _run_generation(skill: str, level: str) -> None:
 
 
 def _run_with_status(skill: str, level: str, roadmap_id: str, user_id: str) -> bool:
-    """
-    Run the flow in a background thread so the main Streamlit thread
-    can poll _progress_log and show live updates every 2 seconds.
-    """
     result = {"success": False, "error": None}
 
     def _worker():
@@ -124,11 +120,9 @@ def _run_with_status(skill: str, level: str, roadmap_id: str, user_id: str) -> b
 
         seen = 0
 
-        # Poll progress while the thread runs — updates every 2 seconds
         while thread.is_alive():
             updates = get_progress_updates()
 
-            # Update stage labels based on what's been logged
             all_text = " ".join(updates)
             if "Stage 1 complete" in all_text:
                 stage1.markdown("✅ Stage 1: Topic structure built")
@@ -137,7 +131,6 @@ def _run_with_status(skill: str, level: str, roadmap_id: str, user_id: str) -> b
             if "Stage 3" in all_text and "complete" in all_text.lower():
                 stage3.markdown("✅ Stage 3: Roadmap assembled and saved")
 
-            # Show any new log messages
             new = updates[seen:]
             if new:
                 seen = len(updates)
@@ -147,7 +140,6 @@ def _run_with_status(skill: str, level: str, roadmap_id: str, user_id: str) -> b
 
             time.sleep(2)
 
-        # Thread finished — final update
         thread.join()
         updates = get_progress_updates()
         if updates:
