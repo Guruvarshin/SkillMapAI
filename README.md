@@ -2,7 +2,7 @@
 
 > Generate a complete, personalised learning roadmap for any skill in minutes.
 
-SkillMap AI takes a skill or job role (e.g. *"React Developer"*, *"Machine Learning Engineer"*) and uses a multi-agent AI system to produce a fully structured learning plan — complete with curated resources, projects, and quizzes for every subtopic.
+SkillMap AI takes a skill or job role (e.g. *"React Developer"*, *"Machine Learning Engineer"*) and uses a multi-agent AI system to produce a fully structured learning plan , complete with curated resources, projects, and quizzes for every subtopic.
 
 
 ---
@@ -23,10 +23,10 @@ For every subtopic in your roadmap:
 
 For the full roadmap:
 
-- 🚀 **Major portfolio project** — resume-worthy, with tech stack and GitHub structure
-- 🗓️ **Realistic timeline** — weekly schedule based on your level
-- 💰 **Budget breakdown** — free path ($0) and paid path with itemised costs
-- 🎓 **Final quiz** — 10 comprehensive questions across the whole roadmap
+- 🚀 **Major portfolio project** , resume-worthy, with tech stack and GitHub structure
+- 🗓️ **Realistic timeline** , weekly schedule based on your level
+- 💰 **Budget breakdown** , free path ($0) and paid path with itemised costs
+- 🎓 **Final quiz** , 10 comprehensive questions across the whole roadmap
 
 ---
 
@@ -36,8 +36,8 @@ For the full roadmap:
 |---|---|
 | UI | Streamlit |
 | AI Orchestration | CrewAI Flows |
-| LLM (reasoning) | Claude Sonnet 4.5 — roadmap structure, projects |
-| LLM (mechanical) | Claude Haiku 4.5 — quizzes, timeline, assembly |
+| LLM (reasoning) | Claude Sonnet 4.5 , roadmap structure, projects |
+| LLM (mechanical) | Claude Haiku 4.5 , quizzes, timeline, assembly |
 | Video Search | YouTube Data API v3 |
 | Web Search | Tavily Search API |
 | Database | MongoDB Atlas |
@@ -49,17 +49,17 @@ For the full roadmap:
 ## Architecture
 
 ```
-Stage 1 — Architect Agent (Claude Sonnet)
+Stage 1 , Architect Agent (Claude Sonnet)
     └── Builds topic tree: 5-8 topics × 2-5 subtopics
 
-Stage 2 — Parallel Workers
+Stage 2 , Parallel Workers
     ├── Video Hunter     → YouTube API per subtopic
     ├── Course Curator   → Tavily search per subtopic
     ├── Project Designer → LLM per topic batch
     ├── Quiz Generator   → LLM per topic batch
     └── Timeline/Budget  → LLM single call
 
-Stage 3 — Python Assembler
+Stage 3 , Python Assembler
     └── Merges all data → Pydantic validation → MongoDB
 ```
 
@@ -116,11 +116,11 @@ CREWAI_TRACING_ENABLED=false
 
 ## Features
 
-- 🔐 **Auth** — Register / login with bcrypt-hashed passwords
-- 📋 **Dashboard** — All your roadmaps with progress bars
-- ✅ **Progress tracking** — Check off subtopics, scores saved per quiz
-- 💾 **Persistent** — All data stored in MongoDB, survives page refreshes
-- 📱 **Responsive** — Works on desktop and tablet
+- 🔐 **Auth** , Register / login with bcrypt-hashed passwords
+- 📋 **Dashboard** , All your roadmaps with progress bars
+- ✅ **Progress tracking** , Check off subtopics, scores saved per quiz
+- 💾 **Persistent** , All data stored in MongoDB, survives page refreshes
+- 📱 **Responsive** , Works on desktop and tablet
 
 ---
 
