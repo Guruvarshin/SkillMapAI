@@ -40,6 +40,17 @@ def render_quiz() -> None:
         )
         return
 
+    # Clear stale widget state if this is a fresh quiz visit
+    # (not a retake — retake clears on button click above)
+    quiz_fresh_key = f"quiz_loaded_{subtopic_id}"
+    if not st.session_state.get(quiz_fresh_key):
+        for key in list(st.session_state.keys()):
+            if key.startswith(f"{subtopic_id}_mcq_") or key.startswith(
+                f"{subtopic_id}_open_"
+            ):
+                del st.session_state[key]
+        st.session_state[quiz_fresh_key] = True
+
     progress = get_progress(user_id, roadmap_id)
     if subtopic_id == "final":
         prior_score = progress.get("final_quiz_score")
@@ -52,6 +63,12 @@ def render_quiz() -> None:
         if not st.session_state.get(f"retake_{subtopic_id}", False):
             if st.button("🔄 Retake Quiz", type="secondary"):
                 st.session_state[f"retake_{subtopic_id}"] = True
+                # Clear stale radio/textarea values from previous attempt
+                for key in list(st.session_state.keys()):
+                    if key.startswith(f"{subtopic_id}_mcq_") or key.startswith(
+                        f"{subtopic_id}_open_"
+                    ):
+                        del st.session_state[key]
                 st.rerun()
             return
 
@@ -116,10 +133,19 @@ def _render_quiz_form(
         )
 
     if submitted:
+        # Read answers directly from session_state using widget keys.
+        # The user_answers dict captured during form render may reflect
+        # stale session_state values from a previous quiz attempt.
+        # Reading from session_state after submit gives the true current values.
+        fresh_answers = {}
+        for i in range(len(mcq_questions)):
+            key = f"{subtopic_id}_mcq_{i}"
+            fresh_answers[i] = st.session_state.get(key)
+
         _score_and_save(
             mcq_questions=mcq_questions,
             open_questions=open_questions,
-            user_answers=user_answers,
+            user_answers=fresh_answers,
             subtopic_id=subtopic_id,
             roadmap_id=roadmap_id,
             user_id=user_id,
@@ -213,7 +239,10 @@ def _render_prior_result(prior_score, subtopic_id: str, questions: list) -> None
 
 
 def _back_button() -> None:
-
     if st.button("← Back to Roadmap", use_container_width=True):
+        # Clear quiz_loaded flags so fresh state on next visit
+        for key in list(st.session_state.keys()):
+            if key.startswith("quiz_loaded_"):
+                del st.session_state[key]
         st.session_state.current_page = "roadmap"
         st.rerun()
