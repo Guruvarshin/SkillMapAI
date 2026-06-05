@@ -8,4 +8,3 @@ bcrypt>=4.1.0
 tavily-python>=0.3.0
 google-api-python-client>=2.130.0
 python-dotenv>=1.0.0
-nest-asyncio>=1.6.0

@@ -1,6 +1,5 @@
 import asyncio
 import sys
-import nest_asyncio
 
 if sys.platform == "win32":
     asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
@@ -15,11 +14,6 @@ from agents.quiz_generator import run_quiz_generator
 from agents.timeline_budget import run_timeline_budget, _build_fallback as tb_fallback
 from agents.assembler import run_assembler
 from db.roadmaps import update_status
-try:
-    nest_asyncio.apply()
-except ValueError:
-    pass
-_progress_log: list[str] = []
 
 
 def get_progress_updates() -> list[str]:
@@ -177,6 +171,8 @@ def run_skillmap_flow(
 ) -> dict:
     global _progress_log
     _progress_log = []
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
     _push_update(f"🚀 Starting generation for: {skill} ({level})")
     flow = SkillMapFlow()
     flow.kickoff(
