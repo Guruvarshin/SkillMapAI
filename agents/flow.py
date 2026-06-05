@@ -15,8 +15,10 @@ from agents.quiz_generator import run_quiz_generator
 from agents.timeline_budget import run_timeline_budget, _build_fallback as tb_fallback
 from agents.assembler import run_assembler
 from db.roadmaps import update_status
-
-nest_asyncio.apply()
+try:
+    nest_asyncio.apply()
+except ValueError:
+    pass
 _progress_log: list[str] = []
 
 
